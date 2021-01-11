@@ -6,4 +6,5 @@ const store = new Vuex.Store({
     Stars
   }
 })
+
 export default store

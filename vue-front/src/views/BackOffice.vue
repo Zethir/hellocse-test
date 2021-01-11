@@ -69,8 +69,17 @@ import { Vue, Options } from 'vue-class-component'
 import { Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import StarsList from '@/components/StarsList.vue'
+import { AxiosResponse } from 'axios'
 
 const starsModule = namespace('Stars')
+
+interface Star {
+  id: number
+  lastname: string
+  firstname: string
+  description: string
+  image: string
+}
 
 @Options({
   components: {
@@ -78,8 +87,8 @@ const starsModule = namespace('Stars')
   }
 })
 export default class BackOffice extends Vue {
-  private selectedStar: any = {
-    id: null,
+  private selectedStar: Star = {
+    id: 0,
     lastname: '',
     firstname: '',
     description: '',
@@ -96,13 +105,13 @@ export default class BackOffice extends Vue {
   private fetchStars!: () => void
 
   @starsModule.Action
-  private updateStar!: (star: any) => any
+  private updateStar!: (star: Star) => Promise<AxiosResponse>
 
   @starsModule.Action
-  private createStar!: (star: any) => any
+  private createStar!: (star: Star) => Promise<AxiosResponse>
 
   @starsModule.Action
-  private deleteStar!: (id: any) => any
+  private deleteStar!: (id: number) => Promise<AxiosResponse>
 
   created() {
     this.fetchStars()
@@ -110,22 +119,22 @@ export default class BackOffice extends Vue {
 
   @Watch('stars')
   starsUpdated(stars: Array<{}>) {
-    this.selectedStar = Object.assign({}, stars[0])
+    this.selectedStar = Object.assign({} as Star, stars[0])
   }
 
   public changeStar(index: number) {
     this.errors = []
     this.success = ''
-    this.selectedStar = Object.assign({}, this.stars[index])
+    this.selectedStar = Object.assign({} as Star, this.stars[index])
   }
 
   public removeStar() {
-    this.deleteStar(this.selectedStar.id).then((res: any) => {
+    this.deleteStar(this.selectedStar.id).then((res: AxiosResponse) => {
       if (res.status === 200) {
         this.success = 'Star successfully deleted'
         this.fetchStars()
       } else {
-        this.errors = res.statusText
+        this.errors.push(res.statusText)
       }
     })
   }
@@ -137,10 +146,10 @@ export default class BackOffice extends Vue {
     this.selectedStar.firstname = ''
     this.selectedStar.description = ''
     this.selectedStar.image = ''
-    this.selectedStar.id = null
+    this.selectedStar.id = 0
   }
 
-  public validateForm(e: any) {
+  public validateForm(e: Event) {
     this.errors = []
     this.success = ''
 
@@ -163,22 +172,22 @@ export default class BackOffice extends Vue {
       this.errors.push('Image is required (max: 200 characters)')
     }
 
-    if (!this.errors.length && this.selectedStar.id) {
-      this.updateStar(this.selectedStar).then((res: any) => {
+    if (!this.errors.length && this.selectedStar.id !== 0) {
+      this.updateStar(this.selectedStar).then((res: AxiosResponse) => {
         if (res.status === 200) {
           this.success = 'Star successfully updated'
           this.fetchStars()
         } else {
-          this.errors = res.statusText
+          this.errors.push(res.statusText)
         }
       })
     } else if (!this.errors.length) {
-      this.createStar(this.selectedStar).then((res: any) => {
+      this.createStar(this.selectedStar).then((res: AxiosResponse) => {
         if (res.status === 200) {
           this.success = 'Star successfully created'
           this.fetchStars()
         } else {
-          this.errors = res.statusText
+          this.errors.push(res.statusText)
         }
       })
     }

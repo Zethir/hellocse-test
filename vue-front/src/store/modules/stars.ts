@@ -1,5 +1,13 @@
 import { VuexModule, Module, Mutation, Action } from 'vuex-module-decorators'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
+
+interface Star {
+  id: number
+  lastname: string
+  firstname: string
+  description: string
+  image: string
+}
 
 @Module({
   namespaced: true
@@ -25,7 +33,7 @@ class Stars extends VuexModule {
   }
 
   @Action
-  public async createStar(star: any): Promise<any> {
+  public async createStar(star: Star): Promise<AxiosResponse> {
     return await axios
       .post('http://localhost:8000/api/stars', star)
       .catch(error => {
@@ -34,7 +42,7 @@ class Stars extends VuexModule {
   }
 
   @Action
-  public async updateStar(star: any): Promise<any> {
+  public async updateStar(star: Star): Promise<AxiosResponse> {
     return await axios
       .put(`http://localhost:8000/api/stars/${star.id}`, star)
       .catch(error => {
@@ -43,7 +51,7 @@ class Stars extends VuexModule {
   }
 
   @Action
-  public async deleteStar(id: any): Promise<any> {
+  public async deleteStar(id: number): Promise<AxiosResponse> {
     return await axios
       .delete(`http://localhost:8000/api/stars/${id}`)
       .catch(error => {

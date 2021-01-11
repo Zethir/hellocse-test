@@ -1,5 +1,5 @@
 <template>
-  <ul>
+  <ul v-if="stars.length">
     <li
       v-for="(star, index) in stars"
       :key="star.id"
